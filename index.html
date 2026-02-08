@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Happy Teddy Day, Vanu 🧸</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--plush:#FFF0E6;--cozy:#E8A87C;--brown:#8B5E3C;--dark:#4A2C17;--pink:#FF7EB3;--gold:#FFD700}
+
+  body{font-family:'Nunito',sans-serif;background:var(--plush);overflow-x:hidden;min-height:100dvh;-webkit-user-select:none;user-select:none}
+
+  /* INTRO */
+  #intro{position:fixed;inset:0;background:linear-gradient(160deg,#FFF5EB,#FFE8D6 40%,#FFDAC1);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;transition:opacity .8s,transform .8s;overflow:hidden}
+  #intro.hidden{opacity:0;transform:scale(1.05);pointer-events:none}
+  .intro-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;opacity:.12}
+  .bg-item{position:absolute;font-size:36px;animation:drift 8s infinite ease-in-out}
+  .i-date{color:var(--cozy);font-size:12px;letter-spacing:4px;text-transform:uppercase;font-weight:700;opacity:0;animation:fu .8s .3s forwards;z-index:2}
+  .i-icon{font-size:72px;margin:12px 0;opacity:0;animation:fu .8s .5s forwards,wobble 3s 1.5s infinite;z-index:2}
+  .i-title{font-family:'Baloo 2',cursive;font-size:clamp(28px,7.5vw,48px);color:var(--dark);text-align:center;line-height:1.2;opacity:0;animation:fu .8s .7s forwards;z-index:2}
+  .i-title span{color:var(--pink)}
+  .i-sub{color:var(--brown);font-size:clamp(13px,3.2vw,17px);text-align:center;margin-top:8px;opacity:0;animation:fu .8s 1s forwards;padding:0 20px;z-index:2;font-weight:600}
+  .i-steps{display:flex;gap:18px;margin:24px 0;opacity:0;animation:fu .8s 1.3s forwards;z-index:2}
+  .i-step{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .i-step .ic{width:42px;height:42px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 2px 8px rgba(139,94,60,.1)}
+  .i-step .lb{font-size:9px;color:var(--brown);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+  .go-btn{margin-top:8px;padding:14px 40px;background:linear-gradient(135deg,var(--pink),#FF5C8D);color:#fff;font-family:'Baloo 2',cursive;font-size:18px;font-weight:800;border:none;border-radius:50px;cursor:pointer;opacity:0;animation:fu .8s 1.6s forwards;box-shadow:0 4px 20px rgba(255,126,179,.4);z-index:2;transition:transform .2s}
+  .go-btn:active{transform:scale(.96)}
+
+  /* BUILDER */
+  #builder{display:none;min-height:100dvh;background:linear-gradient(180deg,#FFF5EB,#FFE8D6);flex-direction:column;align-items:center;padding:12px 16px 40px}
+  #builder.active{display:flex}
+  .b-title{font-family:'Baloo 2',cursive;color:var(--dark);font-size:clamp(18px,4.5vw,24px);text-align:center}
+  .prog{display:flex;gap:6px;margin:8px 0 10px;align-items:center}
+  .prog-dot{width:28px;height:5px;border-radius:3px;background:rgba(139,94,60,.12);transition:.4s}
+  .prog-dot.on{background:var(--pink);width:44px}
+  .prog-dot.done{background:var(--cozy)}
+
+  /* CAT PREVIEW */
+  .cat-box{position:relative;width:clamp(200px,55vw,280px);height:clamp(200px,55vw,280px);margin:0 auto 12px;border-radius:24px;overflow:hidden;box-shadow:0 8px 32px rgba(139,94,60,.18);background:#f5e6d3}
+  .cat-box img{width:100%;height:100%;object-fit:cover;transition:opacity .5s}
+  .cat-overlay{position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center}
+  .ov-hat{position:absolute;top:-2px;left:50%;transform:translateX(-50%);font-size:52px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));transition:.3s;z-index:5}
+  .ov-acc{position:absolute;bottom:12px;right:12px;font-size:40px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.25));transition:.3s;z-index:5}
+  .ov-outfit{position:absolute;inset:0;transition:.3s;z-index:3;border-radius:24px}
+
+  /* OPTION PANEL */
+  .panel{width:100%;max-width:400px;background:#fff;border-radius:20px;padding:16px;box-shadow:0 4px 20px rgba(139,94,60,.08)}
+  .step{display:none;flex-direction:column;gap:8px}
+  .step.on{display:flex;animation:fu .35s ease}
+  .o-label{font-family:'Baloo 2',cursive;font-size:17px;color:var(--dark);text-align:center}
+  .o-sub{font-size:12px;color:var(--brown);text-align:center;margin-top:-4px}
+  .o-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:4px}
+
+  /* Cat selection cards */
+  .cat-card{width:72px;height:72px;border-radius:14px;overflow:hidden;border:3px solid transparent;cursor:pointer;transition:.25s;position:relative}
+  .cat-card img{width:100%;height:100%;object-fit:cover}
+  .cat-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(139,94,60,.15)}
+  .cat-card.sel{border-color:var(--pink);box-shadow:0 4px 16px rgba(255,126,179,.3);transform:translateY(-2px)}
+  .cat-card .cn{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.5);color:#fff;font-size:9px;font-weight:700;text-align:center;padding:2px;line-height:1}
+
+  /* Option buttons */
+  .o-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 12px;background:var(--plush);border:3px solid transparent;border-radius:14px;cursor:pointer;transition:.25s;min-width:64px}
+  .o-btn:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(139,94,60,.12)}
+  .o-btn.sel{border-color:var(--pink);background:#FFF0F5;transform:translateY(-2px);box-shadow:0 4px 14px rgba(255,126,179,.2)}
+  .o-btn .oi{font-size:26px;line-height:1}
+  .o-btn .ol{font-size:10px;font-weight:700;color:var(--dark)}
+
+  .navs{display:flex;gap:10px;margin-top:14px;justify-content:center}
+  .nb{padding:10px 26px;border:none;border-radius:50px;font-family:'Baloo 2',cursive;font-size:15px;font-weight:700;cursor:pointer;transition:.2s}
+  .nb.bk{background:rgba(139,94,60,.1);color:var(--brown)}
+  .nb.nx{background:linear-gradient(135deg,var(--pink),#FF5C8D);color:#fff;box-shadow:0 3px 10px rgba(255,126,179,.3)}
+  .nb:active{transform:translateY(1px)}
+  .nb:disabled{opacity:.35;pointer-events:none}
+
+  /* REVEAL */
+  #reveal{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;background:linear-gradient(160deg,#FFF5EB,#FFE8D6 40%,#FFDAC1);z-index:200;overflow-y:auto;padding:20px 16px 40px}
+  #reveal.active{display:flex}
+  .r-sparkles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+  .sparkle{position:absolute;font-size:20px;animation:spFloat 4s infinite;opacity:0}
+  .r-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;max-width:420px;width:100%}
+  .r-badge{font-size:10px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--cozy);opacity:0;animation:fu .8s .2s forwards}
+  .r-title{font-family:'Baloo 2',cursive;font-size:clamp(24px,6.5vw,40px);color:var(--dark);margin:4px 0 8px;opacity:0;animation:fu .8s .4s forwards}
+  .r-title span{color:var(--pink)}
+
+  .r-frame{width:clamp(220px,60vw,300px);height:clamp(220px,60vw,300px);background:#fff;border-radius:24px;padding:10px;box-shadow:0 8px 40px rgba(139,94,60,.15);margin:10px 0;opacity:0;animation:fu .8s .6s forwards,gFloat 4s 1.5s infinite ease-in-out;position:relative;overflow:visible}
+  .r-frame .inner{width:100%;height:100%;border-radius:18px;overflow:hidden;position:relative}
+  .r-frame .inner img{width:100%;height:100%;object-fit:cover}
+  .r-frame .flabel{position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);background:var(--pink);color:#fff;font-family:'Baloo 2',cursive;font-size:12px;padding:3px 14px;border-radius:20px;white-space:nowrap;box-shadow:0 2px 8px rgba(255,126,179,.3)}
+
+  .r-tag{font-size:12px;color:var(--brown);margin-top:20px;opacity:0;animation:fu .8s .8s forwards;font-weight:600;font-style:italic}
+  .r-msg{background:#fff;border-radius:18px;padding:18px 22px;margin:14px 0;box-shadow:0 4px 16px rgba(139,94,60,.06);opacity:0;animation:fu .8s 1s forwards}
+  .r-msg p{color:var(--dark);font-size:clamp(12.5px,2.8vw,14.5px);line-height:1.9}
+  .r-msg .hl{color:var(--pink);font-weight:800}
+  .r-sign{font-family:'Baloo 2',cursive;color:var(--pink);font-size:clamp(15px,3.8vw,20px);opacity:0;animation:fu .8s 1.3s forwards;margin-top:4px;margin-bottom:40px}
+  .fheart{position:fixed;font-size:22px;animation:hRise 6s infinite;opacity:0;z-index:1}
+
+  @keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes wobble{0%,100%{transform:rotate(0)}25%{transform:rotate(8deg)}75%{transform:rotate(-8deg)}}
+  @keyframes drift{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-18px) rotate(8deg)}}
+  @keyframes gFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  @keyframes spFloat{0%{opacity:0;transform:translateY(20px) scale(.5)}20%{opacity:1}80%{opacity:1}100%{opacity:0;transform:translateY(-100vh) scale(1) rotate(360deg)}}
+  @keyframes hRise{0%{opacity:0;transform:translateY(100vh) scale(.5)}10%{opacity:.7}90%{opacity:.5}100%{opacity:0;transform:translateY(-20vh) scale(1.2)}}
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="intro">
+  <div class="intro-bg" id="bgItems"></div>
+  <div class="i-date">10 Feb · Teddy Day 🧸</div>
+  <div class="i-icon">🧸</div>
+  <div class="i-title">Welcome to the<br><span>Build-a-Catu</span> Workshop!</div>
+  <div class="i-sub">Design your very own Catu teddy, Vanu! Pick a cat, dress it up & more 🐱</div>
+  <div class="i-steps">
+    <div class="i-step"><div class="ic">🐱</div><div class="lb">Cat</div></div>
+    <div class="i-step"><div class="ic">👔</div><div class="lb">Outfit</div></div>
+    <div class="i-step"><div class="ic">✨</div><div class="lb">Accessory</div></div>
+    <div class="i-step"><div class="ic">🎩</div><div class="lb">Hat</div></div>
+  </div>
+  <button class="go-btn" onclick="start()">🐾 Let's Build!</button>
+</div>
+
+<!-- BUILDER -->
+<div id="builder">
+  <div class="b-title" id="stepTitle">Choose Your Catu 🐱</div>
+  <div class="prog">
+    <div class="prog-dot on" id="p0"></div>
+    <div class="prog-dot" id="p1"></div>
+    <div class="prog-dot" id="p2"></div>
+    <div class="prog-dot" id="p3"></div>
+  </div>
+
+  <!-- LIVE PREVIEW -->
+  <div class="cat-box" id="catBox">
+    <img id="mainCat" src="https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg" alt="Catu">
+    <div class="cat-overlay">
+      <div class="ov-hat" id="ovHat"></div>
+      <div class="ov-acc" id="ovAcc"></div>
+      <div class="ov-outfit" id="ovOutfit"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <!-- STEP 0: PICK CAT -->
+    <div class="step on" id="s0">
+      <div class="o-label">Pick Your Catu 🐱</div>
+      <div class="o-sub">Tap to choose the cutest one!</div>
+      <div class="o-grid" id="catGrid">
+        <div class="cat-card sel" onclick="pickCat(this,0)">
+          <img src="https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg" alt="">
+          <div class="cn">Orange</div>
+        </div>
+        <div class="cat-card" onclick="pickCat(this,1)">
+          <img src="https://cdn.pixabay.com/photo/2017/02/20/18/03/cat-2083492_640.jpg" alt="">
+          <div class="cn">Cuddly</div>
+        </div>
+        <div class="cat-card" onclick="pickCat(this,2)">
+          <img src="https://cdn.pixabay.com/photo/2014/11/30/14/11/cat-551554_640.jpg" alt="">
+          <div class="cn">Sweetie</div>
+        </div>
+        <div class="cat-card" onclick="pickCat(this,3)">
+          <img src="https://cdn.pixabay.com/photo/2017/11/09/21/41/cat-2934720_640.jpg" alt="">
+          <div class="cn">Dreamy</div>
+        </div>
+        <div class="cat-card" onclick="pickCat(this,4)">
+          <img src="https://cdn.pixabay.com/photo/2019/11/08/11/36/kittens-4611189_640.jpg" alt="">
+          <div class="cn">Twins!</div>
+        </div>
+        <div class="cat-card" onclick="pickCat(this,5)">
+          <img src="https://cdn.pixabay.com/photo/2024/01/29/20/40/cat-8540772_640.jpg" alt="">
+          <div class="cn">Floofy</div>
+        </div>
+        <div class="cat-card" onclick="pickCat(this,6)">
+          <img src="https://cdn.pixabay.com/photo/2016/01/20/13/05/cat-1151519_640.jpg" alt="">
+          <div class="cn">Curious</div>
+        </div>
+        <div class="cat-card" onclick="pickCat(this,7)">
+          <img src="https://cdn.pixabay.com/photo/2023/09/19/12/34/cat-8262232_640.jpg" alt="">
+          <div class="cn">Sleepy</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 1: OUTFIT -->
+    <div class="step" id="s1">
+      <div class="o-label">Pick an Outfit 👔</div>
+      <div class="o-sub">Dress up your Catu!</div>
+      <div class="o-grid">
+        <div class="o-btn" onclick="pickOutfit(this,'pink')"><span class="oi">💗</span><span class="ol">Pink Vibe</span></div>
+        <div class="o-btn" onclick="pickOutfit(this,'golden')"><span class="oi">✨</span><span class="ol">Golden</span></div>
+        <div class="o-btn" onclick="pickOutfit(this,'cozy')"><span class="oi">🧶</span><span class="ol">Cozy Warm</span></div>
+        <div class="o-btn" onclick="pickOutfit(this,'royal')"><span class="oi">👑</span><span class="ol">Royal</span></div>
+        <div class="o-btn" onclick="pickOutfit(this,'none')"><span class="oi">😼</span><span class="ol">Au Naturel</span></div>
+      </div>
+    </div>
+
+    <!-- STEP 2: ACCESSORY -->
+    <div class="step" id="s2">
+      <div class="o-label">Give Catu Something ✨</div>
+      <div class="o-sub">What should Catu hold for you?</div>
+      <div class="o-grid">
+        <div class="o-btn" onclick="pickAcc(this,'❤️')"><span class="oi">❤️</span><span class="ol">Heart</span></div>
+        <div class="o-btn" onclick="pickAcc(this,'🍫')"><span class="oi">🍫</span><span class="ol">Dark Choc</span></div>
+        <div class="o-btn" onclick="pickAcc(this,'🌹')"><span class="oi">🌹</span><span class="ol">Rose</span></div>
+        <div class="o-btn" onclick="pickAcc(this,'💌')"><span class="oi">💌</span><span class="ol">Love Letter</span></div>
+        <div class="o-btn" onclick="pickAcc(this,'🧸')"><span class="oi">🧸</span><span class="ol">Teddy</span></div>
+      </div>
+    </div>
+
+    <!-- STEP 3: HAT -->
+    <div class="step" id="s3">
+      <div class="o-label">Top It Off 🎩</div>
+      <div class="o-sub">Final touch!</div>
+      <div class="o-grid">
+        <div class="o-btn" onclick="pickHat(this,'🎀')"><span class="oi">🎀</span><span class="ol">Bow</span></div>
+        <div class="o-btn" onclick="pickHat(this,'👑')"><span class="oi">👑</span><span class="ol">Crown</span></div>
+        <div class="o-btn" onclick="pickHat(this,'🎩')"><span class="oi">🎩</span><span class="ol">Top Hat</span></div>
+        <div class="o-btn" onclick="pickHat(this,'🌸')"><span class="oi">🌸</span><span class="ol">Flower</span></div>
+        <div class="o-btn" onclick="pickHat(this,'🥳')"><span class="oi">🥳</span><span class="ol">Party</span></div>
+        <div class="o-btn" onclick="pickHat(this,'')"><span class="oi">😼</span><span class="ol">Nothing</span></div>
+      </div>
+    </div>
+
+    <div class="navs">
+      <button class="nb bk" id="bBack" onclick="prev()" disabled>← Back</button>
+      <button class="nb nx" id="bNext" onclick="next()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- REVEAL -->
+<div id="reveal">
+  <div class="r-sparkles" id="rSparkles"></div>
+  <div id="fHearts"></div>
+  <div class="r-content">
+    <div class="r-badge">✨ Custom Built With Love ✨</div>
+    <div class="r-title">Meet Your <span>Catu</span> Teddy!</div>
+    <div class="r-frame">
+      <div class="inner" id="rInner">
+        <img id="rCatImg" src="" alt="Your Catu">
+        <div class="ov-hat" id="rHat" style="position:absolute;top:-2px;left:50%;transform:translateX(-50%);font-size:48px;z-index:5;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2))"></div>
+        <div class="ov-acc" id="rAcc" style="position:absolute;bottom:10px;right:10px;font-size:36px;z-index:5;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2))"></div>
+        <div class="ov-outfit" id="rOutfit" style="position:absolute;inset:0;border-radius:18px;z-index:3"></div>
+      </div>
+      <div class="flabel">Vanu's Catu 🐱</div>
+    </div>
+    <div class="r-tag">"Handcrafted in the Build-a-Catu Workshop, just for Vanu"</div>
+    <div class="r-msg">
+      <p>
+        Dear Vanu 🐱,<br><br>
+        You just built your very own Catu teddy!<br>
+        But here's a little secret...<br><br>
+        <span class="hl">No teddy in the world could ever hug you the way I want to right now.</span><br><br>
+        Whether it's a plush bear or a dressed-up cat on a screen —
+        nothing comes close to the real thing.<br><br>
+        So here's my promise: the <span class="hl">biggest, warmest, most extra hug</span>
+        is coming your way. In person. No takebacks. 🐾<br><br>
+        Until then, your custom Catu teddy will keep you company.
+        <span class="hl">Happy Teddy Day, my Vanu. 🧸💕</span>
+      </p>
+    </div>
+    <div class="r-sign">Forever your Catu, Dehit 🐱♥</div>
+  </div>
+</div>
+
+<script>
+const CATS=[
+  'https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg',
+  'https://cdn.pixabay.com/photo/2017/02/20/18/03/cat-2083492_640.jpg',
+  'https://cdn.pixabay.com/photo/2014/11/30/14/11/cat-551554_640.jpg',
+  'https://cdn.pixabay.com/photo/2017/11/09/21/41/cat-2934720_640.jpg',
+  'https://cdn.pixabay.com/photo/2019/11/08/11/36/kittens-4611189_640.jpg',
+  'https://cdn.pixabay.com/photo/2024/01/29/20/40/cat-8540772_640.jpg',
+  'https://cdn.pixabay.com/photo/2016/01/20/13/05/cat-1151519_640.jpg',
+  'https://cdn.pixabay.com/photo/2023/09/19/12/34/cat-8262232_640.jpg'
+];
+
+const OUTFITS={
+  pink:'linear-gradient(135deg,rgba(255,126,179,.18),rgba(255,92,141,.12))',
+  golden:'linear-gradient(135deg,rgba(255,215,0,.15),rgba(255,180,0,.1))',
+  cozy:'linear-gradient(135deg,rgba(200,120,60,.15),rgba(180,100,40,.1))',
+  royal:'linear-gradient(135deg,rgba(100,50,180,.15),rgba(80,30,160,.1))',
+  none:'none'
+};
+
+let step=0,catIdx=0,outfit='none',acc='',hat='';
+const titles=["Choose Your Catu 🐱","Pick a Vibe 👔","Give Catu Something ✨","Final Touch — Hat! 🎩"];
+
+// BG items
+(function(){const c=document.getElementById('bgItems'),e=['🧸','🐱','💕','🧶','🎀','💛'];
+for(let i=0;i<15;i++){const t=document.createElement('div');t.className='bg-item';t.textContent=e[i%e.length];
+t.style.left=Math.random()*100+'%';t.style.top=Math.random()*100+'%';
+t.style.animationDelay=Math.random()*5+'s';t.style.animationDuration=(6+Math.random()*4)+'s';c.appendChild(t)}})();
+
+function start(){
+  document.getElementById('intro').classList.add('hidden');
+  setTimeout(()=>document.getElementById('builder').classList.add('active'),800);
+}
+
+function updateUI(){
+  document.getElementById('stepTitle').textContent=titles[step];
+  for(let i=0;i<4;i++){const d=document.getElementById('p'+i);d.classList.remove('on','done');
+  if(i===step)d.classList.add('on');else if(i<step)d.classList.add('done')}
+  for(let i=0;i<4;i++)document.getElementById('s'+i).classList.toggle('on',i===step);
+  document.getElementById('bBack').disabled=step===0;
+  document.getElementById('bNext').textContent=step===3?'✨ Bring Catu to Life!':'Next →';
+}
+
+function next(){if(step<3){step++;updateUI()}else showReveal()}
+function prev(){if(step>0){step--;updateUI()}}
+
+function pickCat(el,idx){
+  document.querySelectorAll('#catGrid .cat-card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');catIdx=idx;
+  document.getElementById('mainCat').src=CATS[idx];
+}
+
+function pickOutfit(el,type){
+  document.querySelectorAll('#s1 .o-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');outfit=type;
+  document.getElementById('ovOutfit').style.background=OUTFITS[type];
+}
+
+function pickAcc(el,emoji){
+  document.querySelectorAll('#s2 .o-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');acc=emoji;
+  document.getElementById('ovAcc').textContent=emoji;
+}
+
+function pickHat(el,emoji){
+  document.querySelectorAll('#s3 .o-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');hat=emoji;
+  document.getElementById('ovHat').textContent=emoji;
+}
+
+function showReveal(){
+  document.getElementById('builder').classList.remove('active');
+  
+  // Set reveal image
+  document.getElementById('rCatImg').src=CATS[catIdx];
+  document.getElementById('rHat').textContent=hat;
+  document.getElementById('rAcc').textContent=acc;
+  document.getElementById('rOutfit').style.background=OUTFITS[outfit];
+
+  // Sparkles
+  const sc=document.getElementById('rSparkles');
+  const se=['✨','💛','🧸','⭐','💕','🐱','🎀'];
+  for(let i=0;i<25;i++){const s=document.createElement('div');s.className='sparkle';
+  s.textContent=se[Math.floor(Math.random()*se.length)];
+  s.style.left=Math.random()*100+'%';s.style.bottom='-20px';
+  s.style.animationDelay=Math.random()*6+'s';s.style.animationDuration=(4+Math.random()*3)+'s';sc.appendChild(s)}
+
+  // Hearts
+  const hc=document.getElementById('fHearts');
+  for(let i=0;i<12;i++){const h=document.createElement('div');h.className='fheart';
+  h.textContent=['💕','🐱','🧸','💛'][Math.floor(Math.random()*4)];
+  h.style.left=Math.random()*100+'%';h.style.animationDelay=Math.random()*6+'s';
+  h.style.animationDuration=(5+Math.random()*4)+'s';h.style.fontSize=(16+Math.random()*12)+'px';hc.appendChild(h)}
+
+  setTimeout(()=>document.getElementById('reveal').classList.add('active'),300);
+}
+</script>
+</body>
+</html>
